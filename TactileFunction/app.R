@@ -1,32 +1,48 @@
+library("devtools")
 library("grid")
 library("extrafont")
 library("rlang")
-source("nemeth.R")
-source("numberfixer.R")
-options(scipen=-3)
+install_github("benthegirl/BlindR")
+library(BlindR)
+
+options(scipen=0)
 
 tactilegrobs<-function(xmin, xmax,y,yaxislabel, xaxislabel,newtitle,pdf=FALSE,points=FALSE){
+  dat<-NULL
   x<-seq(xmin,xmax, length.out = 150)
-  
-  if(length(y)==0|y==""|!is.na(as.numeric(y))){
+  if(sum(y!="")==0){
     ymin<-xmin
     ymax<-xmax
-    if(!is.na(as.numeric(y))){
-      dat<-data.frame(x=x, y=as.numeric(y))
-    }
-    
   }else{
-    dat<-data.frame(x=x, y=unlist(lapply(y,function(a){eval(parse(text=a))})),
-                    group=rep(1:length(y),150))
-    ymin<-min(dat$y)
-    ymax<-max(dat$y)
+    y<-y[y!=""]
+    consts<-suppressWarnings(!is.na(as.numeric(y)))
+    if(sum(consts)>0){
+      datc<-data.frame(x=rep(x,sum(consts)), y=rep(y[consts], each=length(x)),
+                       group=rep(1:sum(consts), each=length(x)))
+      ymin<-xmin
+      ymax<-xmax
+      y<-y[!consts]
+    }else{
+      datc<-list(group=0)
+    }
+    if(length(y)>0){
+      dat<-data.frame(x=rep(x, length(y)), 
+                      y=unlist(lapply(y,function(a){eval(parse(text=a))})),
+                      group=rep((max(datc$group)+1):length(y),each=length(x)))
+      if(max(datc$group)!=0){
+        dat<-rbind(datc,dat)
+      }
+      ymin<-min(dat$y)
+      ymax<-max(dat$y)
+      }
   }
+
   xticks<-grid.pretty(c(xmin, xmax))
   yticks<-grid.pretty(c(ymin, ymax))
   xlabs<-numberfixer(as.character(xticks))
   ylabs<-numberfixer(as.character(yticks))
   if(newtitle=="equation of function"){
-    if(length(y)==0|y==""){
+    if(is.null(dat)){
       title<-textGrob(x=unit(0,"in"), y=unit(10,'in'),just=c("left","top"),
                       label="",
                       gp=gpar(fontsize=29))
@@ -41,14 +57,14 @@ tactilegrobs<-function(xmin, xmax,y,yaxislabel, xaxislabel,newtitle,pdf=FALSE,po
                     gp=gpar(fontsize=29))
   }
   ylabswidth<-max(sapply(ylabs,FUN = nchar))*.333+.7
-  
+
   rightwidthpad<-nchar(tail(xlabs,1))*.333
   yaxislab<-textGrob(x=unit(ylabswidth,"in")-unit(1.3,"cm"),
                      y=unit(10,'in')-grobHeight(title)-unit(1,"cm"),
                      just=c("left","top"),
                      label=yaxislabel,
                      gp=gpar(fontsize=29, fontfamily="Braille29"))
-  
+
   xaxislab<-textGrob(x=unit(ylabswidth,"in")-unit(1.3,"cm"),
                      y=unit(.1,'in'),
                      just=c("left","bottom"),
@@ -71,7 +87,7 @@ tactilegrobs<-function(xmin, xmax,y,yaxislabel, xaxislabel,newtitle,pdf=FALSE,po
                            x=c(rep(c(xmin,xmax),length(yticks))),
                            id=rep(1:length(yticks),each=2),gp=gpar(col="grey85"),
                            default.units="native")
-  if(length(y)==0|y==""){
+  if(is.null(dat)){
     mainlinepng<-NULL
     mainlinepdf<-NULL
   }else{
@@ -79,7 +95,7 @@ tactilegrobs<-function(xmin, xmax,y,yaxislabel, xaxislabel,newtitle,pdf=FALSE,po
     mainlinepdf<-polylineGrob(y=dat$y, x=dat$x, gp=gpar(lwd=7.5),default.units = "native",id=dat$group)
   }
   plotareavpclipoff<-viewport(width=1,height=1, xscale=c(xmin,xmax), yscale=c(ymin,ymax),clip = "off")
-  
+
   xax<-xaxisGrob(at=xticks,
                  label = xlabs,
                  edits=gEditList(gEdit("labels", just=c("left","bottom"),
@@ -128,7 +144,7 @@ server<-function(input, output, session) {
   counter <- reactiveValues(countervalue = 1)
   observeEvent(input$addfunction,{
     counter$countervalue <- counter$countervalue + 1
-    
+
     insertUI(selector = "#addfunction",
              where = "beforeBegin",
              ui =textInput(inputId = paste0("y", counter$countervalue),
@@ -136,9 +152,9 @@ server<-function(input, output, session) {
                            value = "x+1")
     )}
   )
-  
-  
- plotthings<-reactive({ 
+
+
+ plotthings<-reactive({
    fxns<-names(input)[grep("^y[0-9]|^y$", names(input))]
    myy<-unlist(lapply(fxns, function(a){
      input[[a]]
@@ -186,11 +202,11 @@ server<-function(input, output, session) {
   #     cairo_pdf(filename = file,width = 10, height=10,family = "Braille29")
   #     pushViewport(viewport(xscale=c(0,10), yscale=c(0,10),default.units = "in"))
   #     #grid.rect(gp = gpar(col = "grey"))
-  # 
+  #
   #     grid.draw(plotthings()$title)
   #     grid.draw(plotthings()$yaxislab)
   #     grid.draw(plotthings()$xaxislab)
-  # 
+  #
   #     pushViewport(plotthings()$plotareavp)
   #     grid.draw(plotthings()$ticklinesx)
   #     grid.draw(plotthings()$ticklinesy)
