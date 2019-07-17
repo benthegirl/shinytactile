@@ -191,34 +191,31 @@ server<-function(input, output, session) {
          alt = "This is alternate text")
   })
 
-
-
-
-  # output$downloadData <- downloadHandler(
-  #   filename = function() {
-  #     paste("tactileplot", Sys.Date(), ".pdf", sep="")
-  #   },
-  #   content = function(file) {
-  #     cairo_pdf(filename = file,width = 10, height=10,family = "Braille29")
-  #     pushViewport(viewport(xscale=c(0,10), yscale=c(0,10),default.units = "in"))
-  #     #grid.rect(gp = gpar(col = "grey"))
-  #
-  #     grid.draw(plotthings()$title)
-  #     grid.draw(plotthings()$yaxislab)
-  #     grid.draw(plotthings()$xaxislab)
-  #
-  #     pushViewport(plotthings()$plotareavp)
-  #     grid.draw(plotthings()$ticklinesx)
-  #     grid.draw(plotthings()$ticklinesy)
-  #     grid.draw(plotthings()$xaxisline)
-  #     grid.draw(plotthings()$yaxisline)
-  #     grid.draw(plotthings()$mainlinepdf)
-  #     pushViewport(plotthings()$plotareavpclipoff)
-  #     grid.draw(plotthings()$xax)
-  #     grid.draw(plotthings()$yax)
-  #     dev.off()
-  #   }, contentType = "image/pdf"
-  # )
+  output$downloadData <- downloadHandler(
+    filename = function() {
+      paste("tactileplot", Sys.Date(), ".pdf", sep="")
+    },
+    content = function(file) {
+      cairo_pdf(filename = file,width = 10, height=10,family = "Braille29")
+      pushViewport(viewport(xscale=c(0,10), yscale=c(0,10),default.units = "in"))
+      #grid.rect(gp = gpar(col = "grey"))
+      
+      grid.draw(plotthings()$title)
+      grid.draw(plotthings()$yaxislab)
+      grid.draw(plotthings()$xaxislab)
+      
+      pushViewport(plotthings()$plotareavp)
+      grid.draw(plotthings()$ticklinesx)
+      grid.draw(plotthings()$ticklinesy)
+      grid.draw(plotthings()$xaxisline)
+      grid.draw(plotthings()$yaxisline)
+      grid.draw(plotthings()$mainlinepng)
+      pushViewport(plotthings()$plotareavpclipoff)
+      grid.draw(plotthings()$xax)
+      grid.draw(plotthings()$yax)
+      dev.off()
+    }, contentType = "image/pdf"
+  )
 
 }
 
