@@ -193,8 +193,8 @@ server<-function(input, output, session) {
     grid.draw(plotthings()$yax)
     dev.off()
     list(src = outfile,
-         width = 720,
-         height = 720,
+         width = 828,
+         height = 792,
          alt = "This is alternate text")
   })
 

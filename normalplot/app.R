@@ -171,9 +171,11 @@ server<-function(input, output, session) {
   
   output$plot<-renderImage({
     outfile <- tempfile(fileext='.png')
-    png(filename = outfile,width = 720, height=720,family = "Braille29")
-    pushViewport(viewport(xscale=c(0,10), yscale=c(0,10),default.units = "in"))
-    #grid.rect(gp = gpar(col = "grey"))
+    png(filename = outfile,width = 828, height=792,family = "Braille29")
+    pushViewport(viewport(xscale=c(0,11.5), yscale=c(0,11),default.units = "in",name = "paper"))
+    pushViewport(viewport(xscale=c(0,10), yscale=c(0,10),default.units = "in",just = "center",x=unit(5.75,"in"),
+                          width=unit(10, "in"), height=unit(10, "in"),
+                          y=unit(5.5,"in"), name="backgroundarea"))
     
     grid.draw(plotthings()$title)
     grid.draw(plotthings()$yaxislab)
@@ -193,8 +195,8 @@ server<-function(input, output, session) {
     grid.draw(plotthings()$yax)
     dev.off()
     list(src = outfile,
-         width = 720,
-         height = 720,
+         width = 828,
+         height = 792,
          alt = "This is alternate text")
   })
   
@@ -203,9 +205,11 @@ server<-function(input, output, session) {
       paste("tactileplot", Sys.Date(), ".pdf", sep="")
     },
     content = function(file) {
-      cairo_pdf(filename = file,width = 10, height=10,family = "Braille29")
-      pushViewport(viewport(xscale=c(0,10), yscale=c(0,10),default.units = "in"))
-      #grid.rect(gp = gpar(col = "grey"))
+      cairo_pdf(filename = file,width = 11.5, height=11,family = "Braille29")
+      pushViewport(viewport(xscale=c(0,11.5), yscale=c(0,11),default.units = "in",name = "paper"))
+      pushViewport(viewport(xscale=c(0,10), yscale=c(0,10),default.units = "in",just = "center",x=unit(5.75,"in"),
+                            width=unit(10, "in"), height=unit(10, "in"),
+                            y=unit(5.5,"in"), name="backgroundarea"))
       
       grid.draw(plotthings()$title)
       grid.draw(plotthings()$yaxislab)
