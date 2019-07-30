@@ -113,9 +113,8 @@ tactilegrobs<-function(xmin, xmax,y,yaxislabel, xaxislabel,newtitle,pdf=FALSE,po
 }
 
 ui<-pageWithSidebar(
-  headerPanel("tactile tester"),
+  headerPanel("Lines and Points"),
   sidebarPanel(
-    textOutput("text"),
     textInput(inputId = "y",
               label = "Y=",
               value = ".05*x^3-.1*x^2-1"),
@@ -154,7 +153,12 @@ server<-function(input, output, session) {
   )
 
 
+  # reactive({if(input$xmin>=input$xmax){
+  # output$plot<-renderImage({minmaxerror.jpeg})
+  # }else{
+  # 
  plotthings<-reactive({
+   req(is.numeric(input$xmin)&is.numeric(input$xmax)&(input$xmin<input$xmax))
    fxns<-names(input)[grep("^y[0-9]|^y$", names(input))]
    myy<-unlist(lapply(fxns, function(a){
      input[[a]]
@@ -167,8 +171,11 @@ server<-function(input, output, session) {
 
   output$plot<-renderImage({
     outfile <- tempfile(fileext='.png')
-    png(filename = outfile,width = 720, height=720,family = "Braille29")
-    pushViewport(viewport(xscale=c(0,10), yscale=c(0,10),default.units = "in"))
+    png(filename = outfile,width = 828, height=792,family = "Braille29")
+    pushViewport(viewport(xscale=c(0,11.5), yscale=c(0,11),default.units = "in",name = "paper"))
+    pushViewport(viewport(xscale=c(0,10), yscale=c(0,10),default.units = "in",just = "center",x=unit(5.75,"in"),
+                          width=unit(10, "in"), height=unit(10, "in"),
+                          y=unit(5.5,"in"), name="backgroundarea"))
     #grid.rect(gp = gpar(col = "grey"))
 
     grid.draw(plotthings()$title)
@@ -196,9 +203,11 @@ server<-function(input, output, session) {
       paste("tactileplot", Sys.Date(), ".pdf", sep="")
     },
     content = function(file) {
-      cairo_pdf(filename = file,width = 10, height=10,family = "Braille29")
-      pushViewport(viewport(xscale=c(0,10), yscale=c(0,10),default.units = "in"))
-      #grid.rect(gp = gpar(col = "grey"))
+      cairo_pdf(filename = file,width = 11.5, height=11,family = "Braille29")
+      pushViewport(viewport(xscale=c(0,11.5), yscale=c(0,11),default.units = "in",name = "paper"))
+      pushViewport(viewport(xscale=c(0,10), yscale=c(0,10),default.units = "in",just = "center",x=unit(5.75,"in"),
+                            width=unit(10, "in"), height=unit(10, "in"),
+                            y=unit(5.5,"in"), name="backgroundarea"))
       
       grid.draw(plotthings()$title)
       grid.draw(plotthings()$yaxislab)
